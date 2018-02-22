@@ -20,8 +20,6 @@ byte channel_2_currentTimer;
 byte channel_3_currentTimer;
 byte channel_4_currentTimer;
 
-int transInput[4];
-
 void setup() {
 
   // Pin change interrupts for transiever module
@@ -50,15 +48,13 @@ void setup() {
   Wire.write(0x6B); // access PWN_MGMT_1 register
   Wire.write(1); // Wake up MPU and configure to use X axis Gyro as clock reference for increased stability
   Wire.endTransmission();
+
+  Serial.println("Setup complete.");
 }
 
 void loop() {
 
-  throttle = transInput[1];
-  roll = transInput[2];
-  pitch = transInput[3];
-  yaw = transInput[4];
-
+byte testTime = millis();
 readMPU();  
 printData();
 
@@ -141,7 +137,7 @@ int convertTo2s(int x){
       channel_1_signal = 1; // set channel_1 flag = 1
       } 
   } else if (channel_1_signal) { // if digital pin 8 goes low, and channel_1 flag = 1, it is the end of the pulse
-    transInput[1] = currentTime - channel_1_currentTimer; // store pulse width in transciever array
+    throttle = currentTime - channel_1_currentTimer; // store pulse width in transciever array
     channel_1_signal = 0; // clear flag
     }
 
@@ -151,7 +147,7 @@ int convertTo2s(int x){
       channel_2_signal = 1; // set channel_2 flag = 1
       } 
   } else if (channel_2_signal) { // if digital pin 9 goes low, and channel_2 flag = 1, it is the end of the pulse
-    transInput[2] = currentTime - channel_2_currentTimer; // store pulse width in transciever array
+    roll = currentTime - channel_2_currentTimer; // store pulse width in transciever array
     channel_2_signal = 0; // clear flag
     }
 
@@ -161,7 +157,7 @@ int convertTo2s(int x){
       channel_3_signal = 1; // set channel_1 flag = 1
       } 
   } else if (channel_3_signal) { // if digital pin 10 goes low, and channel_3 flag = 1, it is the end of the pulse
-    transInput[3] = currentTime - channel_3_currentTimer; // store pulse width in transciever array
+    pitch = currentTime - channel_3_currentTimer; // store pulse width in transciever array
     channel_3_signal = 0; // clear flag
     }
 
@@ -171,7 +167,7 @@ int convertTo2s(int x){
       channel_4_signal = 1; // set channel_4 flag = 1
       } 
   } else if (channel_4_signal) { // if digital pin 11 goes low, and channel_4 flag = 1, it is the end of the pulse
-    transInput[4] = currentTime - channel_4_currentTimer; // store pulse width in transciever array
+    yaw = currentTime - channel_4_currentTimer; // store pulse width in transciever array
     channel_4_signal = 0; // clear flag
     }
   }

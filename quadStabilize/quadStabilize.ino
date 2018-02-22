@@ -3,9 +3,11 @@
 // sensor/data vars
 
 int16_t rawGyroX, rawGyroY, rawGyroZ, rawAccelX, rawAccelY, rawAccelZ, rawTemp;
-int16_t GyroX, GyroY, GyroZ, AccelX, AccelY, AccelZ, sensorTemp;
+int16_t GyroX, GyroY, GyroZ, AccelX, AccelY, AccelZ, sensorTemp, transInput[4];
 byte errorTest;
 byte throttle, pitch, roll, yaw;
+int16_t tError, rError, yError, pError;
+int16_t tErrorLast, rErrorLast, yErrorLast, pErrorLast;
 
 // transciever vars
 
@@ -137,7 +139,7 @@ int convertTo2s(int x){
       channel_1_signal = 1; // set channel_1 flag = 1
       } 
   } else if (channel_1_signal) { // if digital pin 8 goes low, and channel_1 flag = 1, it is the end of the pulse
-    throttle = currentTime - channel_1_currentTimer; // store pulse width in transciever array
+    transInput[1] = currentTime - channel_1_currentTimer; // store pulse width in transciever array
     channel_1_signal = 0; // clear flag
     }
 
@@ -147,7 +149,7 @@ int convertTo2s(int x){
       channel_2_signal = 1; // set channel_2 flag = 1
       } 
   } else if (channel_2_signal) { // if digital pin 9 goes low, and channel_2 flag = 1, it is the end of the pulse
-    roll = currentTime - channel_2_currentTimer; // store pulse width in transciever array
+    transInput[2] = currentTime - channel_2_currentTimer; // store pulse width in transciever array
     channel_2_signal = 0; // clear flag
     }
 
@@ -157,7 +159,7 @@ int convertTo2s(int x){
       channel_3_signal = 1; // set channel_1 flag = 1
       } 
   } else if (channel_3_signal) { // if digital pin 10 goes low, and channel_3 flag = 1, it is the end of the pulse
-    pitch = currentTime - channel_3_currentTimer; // store pulse width in transciever array
+    transInput[3] = currentTime - channel_3_currentTimer; // store pulse width in transciever array
     channel_3_signal = 0; // clear flag
     }
 
@@ -167,8 +169,31 @@ int convertTo2s(int x){
       channel_4_signal = 1; // set channel_4 flag = 1
       } 
   } else if (channel_4_signal) { // if digital pin 11 goes low, and channel_4 flag = 1, it is the end of the pulse
-    yaw = currentTime - channel_4_currentTimer; // store pulse width in transciever array
+    transInput[4] = currentTime - channel_4_currentTimer; // store pulse width in transciever array
     channel_4_signal = 0; // clear flag
     }
+  }
+
+
+void computeError() {
+  
+  if (transInput[1] > 1510) throttle = (transInput[1]-1510);
+  else if (transInput[1] < 1490) throttle = (1490-transInput[1]);  
+
+  if (transInput[2] > 1510) pitch = (transInput[1]-1510);
+  else if (transInput[2] < 1490) throttle = (1490-transInput[1]);
+
+  if (transInput[1] > 1510) throttle = (transInput[1]-1510);
+  else if (transInput[1] < 1490) throttle = (1490-transInput[1]);
+
+  if (transInput[1] > 1510) throttle = (transInput[1]-1510);
+  else if (transInput[1] < 1490) throttle = (1490-transInput[1]);
+  }
+
+void calculatePID(int error, int previous error){
+  
+  
+  
+  
   }
 

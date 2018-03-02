@@ -2,8 +2,8 @@
 
 // sensor/data vars
 
-int16_t rawGyroX, rawGyroY, rawGyroZ, rawAccelX, rawAccelY, rawAccelZ, rawTemp;
-int16_t GyroX, GyroY, GyroZ, AccelX, AccelY, AccelZ, sensorTemp, transInput[4];
+int16_t rawGyroX, rawGyroY, rawGyroZ, rawAccelX, rawAccelY, rawAccelZ, rawTemp, transInput[4];
+float GyroX, GyroY, GyroZ, AccelX, AccelY, AccelZ, sensorTemp;
 byte errorTest;
 byte throttle, pitch, roll, yaw;
 int16_t tError, rError, yError, pError;
@@ -80,13 +80,13 @@ void readMPU() {
   rawGyroY = Wire.read() << 8 | Wire.read(); 
   rawGyroZ = Wire.read() << 8 | Wire.read(); 
 
-  sensorTemp = convertTo2s(rawTemp)/340 + 36.58; // Converting raw temp value to degree celsius as stated in the datasheet
-  AccelX = rawAccelX / 16384; // the sensitivity scale factor is 16384 LSB/g
-  AccelY = rawAccelY / 16384; // Puts the raw values into g's
-  AccelZ = rawAccelZ / 16384;  
-  GyroX = rawGyroX / 131; // converts raw values to degrees/sec
-  GyroY = rawGyroY / 131;
-  GyroZ = rawGyroZ / 131;
+  sensorTemp = convertTo2s(rawTemp)/340.0 + 36.58; // Converting raw temp value to degree celsius as stated in the datasheet
+  AccelX = rawAccelX / 16384.0; // the sensitivity scale factor is 16384 LSB/g
+  AccelY = rawAccelY / 16384.0; // Puts the raw values into g's
+  AccelZ = rawAccelZ / 16384.0;  
+  GyroX = rawGyroX / 131.0; // converts raw values to degrees/sec
+  GyroY = rawGyroY / 131.0;
+  GyroZ = rawGyroZ / 131.0;
   }
 
 // Print sensor values on serial monitor
@@ -172,28 +172,5 @@ int convertTo2s(int x){
     transInput[4] = currentTime - channel_4_currentTimer; // store pulse width in transciever array
     channel_4_signal = 0; // clear flag
     }
-  }
-
-
-void computeError() {
-  
-  if (transInput[1] > 1510) throttle = (transInput[1]-1510);
-  else if (transInput[1] < 1490) throttle = (1490-transInput[1]);  
-
-  if (transInput[2] > 1510) pitch = (transInput[1]-1510);
-  else if (transInput[2] < 1490) throttle = (1490-transInput[1]);
-
-  if (transInput[1] > 1510) throttle = (transInput[1]-1510);
-  else if (transInput[1] < 1490) throttle = (1490-transInput[1]);
-
-  if (transInput[1] > 1510) throttle = (transInput[1]-1510);
-  else if (transInput[1] < 1490) throttle = (1490-transInput[1]);
-  }
-
-void calculatePID(int error, int previous error){
-  
-  
-  
-  
   }
 

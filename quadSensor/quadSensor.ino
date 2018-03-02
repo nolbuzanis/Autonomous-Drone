@@ -1,7 +1,7 @@
 #include "Wire.h"
 
 int16_t rawGyroX, rawGyroY, rawGyroZ, rawAccelX, rawAccelY, rawAccelZ, rawTemp;
-int16_t GyroX, GyroY, GyroZ, AccelX, AccelY, AccelZ, sensorTemp;
+float GyroX, GyroY, GyroZ, AccelX, AccelY, AccelZ, sensorTemp;
 //byte interruptFlag = 0;
 byte errorTest;
 
@@ -12,7 +12,7 @@ void mpuInterrupt() {
 
 void setup() {
 
-  Serial.begin(38400);
+  Serial.begin(9600);
   Serial.println("Initializing I2C devices...");
   Wire.setClock(400000); // Set I2C clock speed to 400kHz
   Wire.begin(); // Start IC2 as master
@@ -60,48 +60,31 @@ void loop() {
   rawGyroY = Wire.read() << 8 | Wire.read(); 
   rawGyroZ = Wire.read() << 8 | Wire.read(); 
 
-sensorTemp = convertTo2s(rawTemp)/340 + 36.58; // Converting raw temp value to degree celsius as stated in the datasheet
-AccelX = rawAccelX / 16384; // the sensitivity scale factor is 16384 LSB/g
-AccelY = rawAccelY / 16384; // Puts the raw values into g's
-AccelZ = rawAccelZ / 16384;  
-GyroX = rawGyroX / 131; // converts raw values to degrees/sec
-GyroY = rawGyroY / 131;
-GyroZ = rawGyroZ / 131;
+sensorTemp = rawTemp/340.0 + 36.58; // Converting raw temp value to degree celsius as stated in the datasheet
+AccelX = rawAccelX / 16384.0; // the sensitivity scale factor is 16384 LSB/g
+AccelY = rawAccelY / 16384.0; // Puts the raw values into g's
+AccelZ = rawAccelZ / 16384.0;  
+GyroX = rawGyroX / 131.0; // converts raw values to degrees/sec
+GyroY = rawGyroY / 131.0;
+GyroZ = rawGyroZ / 131.0;
 
-Serial.println("Accelerometer: ");
+Serial.print("Accelerometer: ");
 Serial.print("X: ");
 Serial.print(AccelX);
 Serial.print("\t Y: ");
 Serial.print(AccelY);
 Serial.print("\t Z: ");
-Serial.print(AccelZ);
-Serial.println("Temperature: ");
-Serial.print("Temp (C): ");
-Serial.print(sensorTemp);
-Serial.println("Gyroscope: ");
+Serial.println(AccelZ);
+Serial.print("Temperature: ");
+Serial.println(sensorTemp);
+Serial.print("Gyroscope: ");
 Serial.print("X: ");
 Serial.print(GyroX);
 Serial.print("\t Y: ");
 Serial.print(GyroY);
 Serial.print("\t Z: ");
-Serial.print(GyroZ);
+Serial.println(GyroZ);
 
-delay(100); // wait 100ms
+delay(500); // wait 100ms
 }
-
-// Converts signed binary values to 2's complement
-
-int convertTo2s(int x){
-  
-  if (x >> 15 & 1) {
-  byte lowX, highX;
-  highX = (x >> 8) & B01111111; // Change the sign bit to a 0 and take upper 8 bits of x
-  lowX = x; // take lower 8 bits of x
-  highX = B01111111 - highX; // invert upper binary digits of x
-  lowX = B11111111 - lowX + 1; // invert lower binary digits of x and add 1
-  
-  x = highX << 8 | lowX;
-  }
-  return x;
-  }
 

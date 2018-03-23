@@ -5,6 +5,8 @@
 int16_t rawGyroX, rawGyroY, rawGyroZ, rawAccelX, rawAccelY, rawAccelZ, rawTemp, transInput[4];
 float GyroX, GyroY, GyroZ, AccelX, AccelY, AccelZ, sensorTemp;
 byte errorTest;
+byte testTime;
+byte lastError[4];
 byte throttle, pitch, roll, yaw;
 int16_t tError, rError, yError, pError;
 int16_t tErrorLast, rErrorLast, yErrorLast, pErrorLast;
@@ -27,12 +29,9 @@ void setup() {
   // Pin change interrupts for transiever module
   PCICR |= (1 << PCIE0);
   PCMSK0 |= (1<<PCINT3 | 1<<PCINT2 | 1<<PCINT1 | 1<<PCINT0);
-  
-  // Setting tranciever pins as inputs
-  pinMode(8, INPUT);
-  pinMode(9, INPUT);
-  pinMode(10, INPUT);
-  pinMode(11, INPUT);
+
+  // Digital pins are output by default
+  DDRB |= B00001111; // Set digital pins 8,9,10,11 as inputs
 
   Serial.begin(38400);
   Serial.println("Initializing I2C devices...");
@@ -56,11 +55,12 @@ void setup() {
 
 void loop() {
 
-byte testTime = millis();
+testTime = micros();
 readMPU();  
 printData();
 
-delayMicroseconds(4000); // wait 4000us or 4 milliseconds (250 Hz)
+
+while(micros() - testTime < 4000){}; // wait 4000us or 4 milliseconds (250 Hz), keeps all loop times to 4 ms
 }
 
 // Read sensor values from the MPU6050
@@ -80,7 +80,7 @@ void readMPU() {
   rawGyroY = Wire.read() << 8 | Wire.read(); 
   rawGyroZ = Wire.read() << 8 | Wire.read(); 
 
-  sensorTemp = convertTo2s(rawTemp)/340.0 + 36.58; // Converting raw temp value to degree celsius as stated in the datasheet
+  sensorTemp = rawTemp/340.0 + 36.58; // Converting raw temp value to degree celsius as stated in the datasheet
   AccelX = rawAccelX / 16384.0; // the sensitivity scale factor is 16384 LSB/g
   AccelY = rawAccelY / 16384.0; // Puts the raw values into g's
   AccelZ = rawAccelZ / 16384.0;  
@@ -112,27 +112,10 @@ void printData(){
   Serial.print(GyroZ);
   }
 
-
-// Converts signed binary values to 2's complement
-
-int convertTo2s(int x){
-  
-  if (x >> 15 & 1) {
-  byte lowX, highX;
-  highX = (x >> 8) & B01111111; // Change the sign bit to a 0 and take upper 8 bits of x
-  lowX = x; // take lower 8 bits of x
-  highX = B01111111 - highX; // invert upper binary digits of x
-  lowX = B11111111 - lowX + 1; // invert lower binary digits of x and add 1
-  
-  x = highX << 8 | lowX;
-  }
-  return x;
-  }
-
 // Interupt Service Routine (ISR) for transciever
 
   ISR (PCINT0_vect) {
-  currentTime = millis();
+  currentTime = micros();
   if (PINB & B00000001) { // digital pin 8 high
     if (channel_1_signal == 0) {
       channel_1_currentTimer = currentTime; // get current currentTime
@@ -173,4 +156,18 @@ int convertTo2s(int x){
     channel_4_signal = 0; // clear flag
     }
   }
+
+  void PID_compute() {
+
+  byte error;
+  
+    for (i=0;i<4;i++) {
+      error = transInput[i] - 
+      
+      
+      }
+    
+    
+    }
+  
 

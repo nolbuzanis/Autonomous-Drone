@@ -15,8 +15,10 @@ void setup() {
 
 void loop() {
 
-  int throttle = analogRead(0);
+  int throttle = analogRead(4);
   radio.write(&throttle, sizeof(throttle));
-  
+  //delay(10);
+  //char text[] = "Space";
+  //radio.write(&text, sizeof(text));
   delay(250);
 }

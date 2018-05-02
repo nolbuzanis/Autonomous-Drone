@@ -1,17 +1,18 @@
 #include "Wire.h"
+#include <math.h>
+
+#define timeConstant 0.2
+#define delta 0.004 // 4 milliseconds for a 250Hz loop
+#define RAD_TO_DEGREES 180/3.14159
 
 int16_t rawGyroX, rawGyroY, rawGyroZ, rawAccelX, rawAccelY, rawAccelZ, rawTemp;
 float GyroX, GyroY, GyroZ, AccelX, AccelY, AccelZ, sensorTemp;
-//byte interruptFlag = 0;
-byte errorTest;
-
-/*
-void mpuInterrupt() {
-  interruptFlag = 1;
-  }*/
+byte errorTest, alpha;
+float outputY = 0, outputX = 0, outputZ = 0;
 
 void setup() {
 
+  alpha = timeConstant / (timeConstant + delta); //Around 0.96
   Serial.begin(9600);
   Serial.println("Initializing I2C devices...");
   Wire.setClock(400000); // Set I2C clock speed to 400kHz
@@ -28,21 +29,6 @@ void setup() {
   Wire.write(0x6B); // access PWN_MGMT_1 register
   Wire.write(1); // Wake up MPU and configure to use X axis Gyro as clock reference for increased stability
   Wire.endTransmission();
-
-  /*
-  Wire.beginTransmission(0x68); 
-  Wire.write(0x23); // write to register 35, FIFO enable
-  Wire.write(0xF8); // set enable bits to 11111000 to enable data from accelerometer, gyro, and temp sensor
-  Wire.endTransmission();
-
-  Wire.beginTransmission(0x68); 
-  Wire.write(0x6A); // User Control register
-  Wire.write(0x40); // set FIFO EN bit to 1
-  Wire.endTransmission();
-
-  // Enable interrupt detection from Arduino
-  attachInterrupt(0, mpuInterrupt, RISING);
-  */
 }
 
 void loop() {
@@ -68,11 +54,12 @@ GyroX = rawGyroX / 131.0; // converts raw values to degrees/sec
 GyroY = rawGyroY / 131.0;
 GyroZ = rawGyroZ / 131.0;
 
-Serial.print("Accelerometer: ");
+complementaryFilter();
+/*Serial.print("Accelerometer: ");
 Serial.print("X: ");
 Serial.print(AccelX);
 Serial.print("\t Y: ");
-Serial.print(AccelY);
+Serial.println(AccelY);
 Serial.print("\t Z: ");
 Serial.println(AccelZ);
 Serial.print("Temperature: ");
@@ -84,7 +71,18 @@ Serial.print("\t Y: ");
 Serial.print(GyroY);
 Serial.print("\t Z: ");
 Serial.println(GyroZ);
-
-delay(500); // wait 100ms
+*/
+delay(500); // wait 500ms
 }
+
+void complementaryFilter() {
+  // Calculating roll angle
+  float p = atan2(AccelX,sqrt(square(AccelY) + square(AccelZ))) * RAD_TO_DEGREES; //roll angle
+  outputY = alpha * (outputY + GyroY*delta) + (1 - alpha) * p;
+  // Calculating pitch angle
+  float fi = atan2(AccelY,sqrt(square(AccelX) + square(AccelZ))) * RAD_TO_DEGREES; //pitch angle
+  outputX = alpha * (outputX + GyroX*delta) + (1 - alpha) * fi;
+  }
+
+
 

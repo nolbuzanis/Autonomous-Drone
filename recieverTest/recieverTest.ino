@@ -3,7 +3,8 @@
 #include <RF24.h>
 
 RF24 radio(7, 8); // CE, CSN
-
+int data[4];
+int ly,lx,ry,rx;
 const byte address[6] = "00001";
 
 void setup() {
@@ -17,9 +18,22 @@ void setup() {
 
 void loop() {
   if (radio.available()) {
-    int text;
-    radio.read(&text, sizeof(text));
-    Serial.println(text);
+    radio.read(data, sizeof(data));
+  
+    ly = data[0];
+    lx = data[1];
+    ry = data[2];
+    rx = data[3];
+
+    Serial.print("LX: ");
+    Serial.print(lx);
+    Serial.print("\t LY: ");
+    Serial.print(ly);
+    Serial.print("\t RX: ");
+    Serial.print(rx);
+    Serial.print("\t RY: ");
+    Serial.println(ry);
   }
+    
     
 }

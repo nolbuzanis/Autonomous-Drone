@@ -76,12 +76,17 @@ delay(500); // wait 500ms
 }
 
 void complementaryFilter() {
-  // Calculating roll angle
-  float p = atan2(AccelX,sqrt(square(AccelY) + square(AccelZ))) * RAD_TO_DEGREES; //roll angle
-  outputY = alpha * (outputY + GyroY*delta) + (1 - alpha) * p;
   // Calculating pitch angle
-  float fi = atan2(AccelY,sqrt(square(AccelX) + square(AccelZ))) * RAD_TO_DEGREES; //pitch angle
+  float p = atan(AccelX/(sqrt(square(AccelY) + square(AccelZ)))) * RAD_TO_DEGREES; //roll angle
+  outputY = alpha * (outputY + GyroY*delta) + (1 - alpha) * p;
+  Serial.print("\t Pitch Angle: ");
+  Serial.print(-outputY);
+  // Calculating roll angle
+  float fi = atan(AccelY/(sqrt(square(AccelX) + square(AccelZ)))) * RAD_TO_DEGREES; //pitch angle
   outputX = alpha * (outputX + GyroX*delta) + (1 - alpha) * fi;
+  Serial.print("\t Roll Angle: ");
+  Serial.println(outputX);
+ 
   }
 
 
